@@ -232,7 +232,10 @@ public class Minefield : Object
         if (locations[x, y].cleared || locations[x, y].flag == FlagType.FLAG)
             return;
 
-        clear_mines_recursive (x, y);
+        if (!attempt_clear(x, y))
+            return;
+
+        work_on_neighbours (x, y);
 
         /* Failed if this contained a mine */
         if (locations[x, y].has_mine)
@@ -258,11 +261,10 @@ public class Minefield : Object
         }
     }
 
-    private void clear_mines_recursive (uint x, uint y)
+    private bool attempt_clear (uint x, uint y)
     {
-        /* Ignore if already cleared */
         if (locations[x, y].cleared)
-            return;
+            return false;
 
         locations[x, y].cleared = true;
         _n_cleared++;
@@ -271,18 +273,93 @@ public class Minefield : Object
         locations[x, y].flag = FlagType.NONE;
         redraw_sector (x, y);
         marks_changed ();
+        return true;
+    }
 
-        /* Automatically clear locations if no adjacent mines */
-        if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == 0)
+    private void work_on_neighbours (uint x, uint y)
+    {
+        bool changed = false;
+        if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == get_n_uncleared_neighbours (x, y))
         {
             foreach (var neighbour in neighbour_map)
             {
                 var nx = (int) x + neighbour.x;
                 var ny = (int) y + neighbour.y;
-                if (is_location (nx, ny))
-                    clear_mines_recursive (nx, ny);
+                if (is_location (nx, ny) && !is_cleared (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
+                {
+                    set_flag (nx, ny, FlagType.FLAG);
+                    changed = true;
+                }
             }
         }
+
+        // Automatically clear locations if no adjacent mines
+        if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == get_n_flagged_neighbours (x, y))
+        {
+            foreach (var neighbour in neighbour_map)
+            {
+                var nx = (int) x + neighbour.x;
+                var ny = (int) y + neighbour.y;
+                if (is_location (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
+                {
+                    if (attempt_clear(nx, ny))
+                    {
+                        changed = true;
+                    }
+                }
+            }
+        }
+
+        if (changed)
+        {
+            foreach (var neighbour in neighbour_map)
+            {
+                var nx = (int) x + neighbour.x;
+                var ny = (int) y + neighbour.y;
+                if (is_location (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
+                {
+                    work_on_neighbours(nx, ny);
+                }
+            }
+        }
+    }
+
+    private uint get_n_uncleared_neighbours (uint x, uint y)
+    {
+        var count = 0;
+        foreach (var neighbour in neighbour_map)
+        {
+            var nx = (int) x + neighbour.x;
+            var ny = (int) y + neighbour.y;
+            if (is_location (nx, ny) && !is_cleared(nx, ny))
+                count += 1;
+        }
+        return count;
+    }
+
+    private uint get_n_flagged_neighbours (uint x, uint y)
+    {
+        var count = 0;
+        foreach (var neighbour in neighbour_map)
+        {
+            var nx = (int) x + neighbour.x;
+            var ny = (int) y + neighbour.y;
+            if (is_location (nx, ny) && !is_cleared(nx, ny) && get_flag(nx, ny) == FlagType.FLAG)
+                count += 1;
+        }
+        return count;
+    }
+
+    private bool has_unknown_neighbours (uint x, uint y)
+    {
+        foreach (var neighbour in neighbour_map)
+        {
+            var nx = (int) x + neighbour.x;
+            var ny = (int) y + neighbour.y;
+            if (is_location (nx, ny) && !is_cleared(nx, ny) && get_flag(nx,ny) != FlagType.FLAG)
+                return true;
+        }
+        return false;
     }
 
     public void set_flag (uint x, uint y, FlagType flag)
