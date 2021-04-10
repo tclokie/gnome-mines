@@ -48,6 +48,12 @@ private const Neighbour neighbour_map[] =
     { -1,  0 }
 };
 
+public struct Coordinate
+{
+    public uint x;
+    public uint y;
+}
+
 public class Minefield : Object
 {
     /* Size of map */
@@ -278,47 +284,63 @@ public class Minefield : Object
 
     private void work_on_neighbours (uint x, uint y)
     {
-        bool changed = false;
-        if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == get_n_uncleared_neighbours (x, y))
-        {
-            foreach (var neighbour in neighbour_map)
-            {
-                var nx = (int) x + neighbour.x;
-                var ny = (int) y + neighbour.y;
-                if (is_location (nx, ny) && !is_cleared (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
-                {
-                    set_flag (nx, ny, FlagType.FLAG);
-                    changed = true;
-                }
-            }
-        }
+        Queue<Coordinate?> queue = new Queue<Coordinate?> ();
+        queue.push_tail({x, y});
 
-        // Automatically clear locations if no adjacent mines
-        if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == get_n_flagged_neighbours (x, y))
+        while (!queue.is_empty())
         {
-            foreach (var neighbour in neighbour_map)
+            Coordinate c = queue.pop_tail();
+            x = c.x;
+            y = c.y;
+
+            bool changed = false;
+            if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == get_n_uncleared_neighbours (x, y))
             {
-                var nx = (int) x + neighbour.x;
-                var ny = (int) y + neighbour.y;
-                if (is_location (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
+                foreach (var neighbour in neighbour_map)
                 {
-                    if (attempt_clear(nx, ny))
+                    var nx = (int) x + neighbour.x;
+                    var ny = (int) y + neighbour.y;
+                    if (is_location (nx, ny) && !is_cleared (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
                     {
-                        changed = true;
+                        set_flag (nx, ny, FlagType.FLAG);
+                        foreach (var second_neighbour in neighbour_map)
+                        {
+                            var nnx = (int) nx + neighbour.x;
+                            var nny = (int) ny + neighbour.y;
+                            queue.push_tail({nnx, nny});
+                        }
                     }
                 }
             }
-        }
 
-        if (changed)
-        {
-            foreach (var neighbour in neighbour_map)
+            // Automatically clear locations if no adjacent mines
+            if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == get_n_flagged_neighbours (x, y))
             {
-                var nx = (int) x + neighbour.x;
-                var ny = (int) y + neighbour.y;
-                if (is_location (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
+                foreach (var neighbour in neighbour_map)
                 {
-                    work_on_neighbours(nx, ny);
+                    var nx = (int) x + neighbour.x;
+                    var ny = (int) y + neighbour.y;
+                    if (is_location (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
+                    {
+                        if (attempt_clear(nx, ny))
+                        {
+                            queue.push_tail({nx, ny});
+                        }
+                    }
+                }
+            }
+
+
+            if (changed)
+            {
+                foreach (var neighbour in neighbour_map)
+                {
+                    var nx = (int) x + neighbour.x;
+                    var ny = (int) y + neighbour.y;
+                    if (is_location (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
+                    {
+                        queue.push_tail({nx, ny});
+                    }
                 }
             }
         }
