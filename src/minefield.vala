@@ -303,12 +303,7 @@ public class Minefield : Object
                     if (is_location (nx, ny) && !is_cleared (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
                     {
                         set_flag (nx, ny, FlagType.FLAG);
-                        foreach (var second_neighbour in neighbour_map)
-                        {
-                            var nnx = (int) nx + neighbour.x;
-                            var nny = (int) ny + neighbour.y;
-                            queue.push_tail({nnx, nny});
-                        }
+                        queue.push_tail({nx, ny});
                     }
                 }
             }
@@ -326,20 +321,6 @@ public class Minefield : Object
                         {
                             queue.push_tail({nx, ny});
                         }
-                    }
-                }
-            }
-
-
-            if (changed)
-            {
-                foreach (var neighbour in neighbour_map)
-                {
-                    var nx = (int) x + neighbour.x;
-                    var ny = (int) y + neighbour.y;
-                    if (is_location (nx, ny) && get_flag(nx, ny) != FlagType.FLAG)
-                    {
-                        queue.push_tail({nx, ny});
                     }
                 }
             }
