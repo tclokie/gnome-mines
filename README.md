@@ -1,3 +1,4 @@
+
 A fork of [GNOME Mines](https://github.com/GNOME/gnome-mines) that's smart enough to figure out the basic logic for you.
 
 Using two simple rules, Smart Mines is able to solve a large amount of a given minefield automatically. The two rules are:
@@ -9,10 +10,10 @@ Simple, right? It's surprisingly effective.
 
 Before these rules, GNOME Mines worked like this:
 
-https://user-images.githubusercontent.com/6445061/114310552-16f95b80-9ab9-11eb-8059-cb1165f81d00.mp4
+![Gnome-Mines](https://user-images.githubusercontent.com/6445061/114312719-a9056200-9ac1-11eb-9492-2aada03b88fd.gif)
 
 Now, the AI turns it into:
 
-https://user-images.githubusercontent.com/6445061/114310556-1b257900-9ab9-11eb-9df1-5f5831d79480.mp4
+![Smart-Mines](https://user-images.githubusercontent.com/6445061/114312720-a9056200-9ac1-11eb-989b-9ac5f58152c6.gif)
 
 Use gnome-builder to compile and build this project.
