@@ -252,29 +252,6 @@ public class Minefield : Object
             if (is_location(nx, ny))
                 work_on_neighbours(nx, ny);
         }
-
-        /* Failed if this contained a mine */
-        if (locations[x, y].has_mine)
-        {
-            if (!exploded)
-            {
-                exploded = true;
-                stop_clock ();
-                explode ();
-            }
-            return;
-        }
-
-        /* Mark unmarked mines when won */
-        if (is_complete && !exploded)
-        {
-            stop_clock ();
-            for (var tx = 0; tx < width; tx++)
-                for (var ty = 0; ty < height; ty++)
-                    if (has_mine (tx, ty))
-                        set_flag (tx, ty, FlagType.FLAG);
-            cleared ();
-        }
     }
 
     private bool attempt_clear (uint x, uint y)
@@ -289,6 +266,29 @@ public class Minefield : Object
         locations[x, y].flag = FlagType.NONE;
         redraw_sector (x, y);
         marks_changed ();
+
+        /* Failed if this contained a mine */
+        if (locations[x, y].has_mine)
+        {
+            if (!exploded)
+            {
+                exploded = true;
+                stop_clock ();
+                explode ();
+            }
+            return false;
+        }
+
+        /* Mark unmarked mines when won */
+        if (is_complete && !exploded)
+        {
+            stop_clock ();
+            for (var tx = 0; tx < width; tx++)
+                for (var ty = 0; ty < height; ty++)
+                    if (has_mine (tx, ty))
+                        set_flag (tx, ty, FlagType.FLAG);
+            cleared ();
+        }
         return true;
     }
 
@@ -305,7 +305,7 @@ public class Minefield : Object
             x = c.x;
             y = c.y;
 
-            if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == get_n_uncleared_neighbours (x, y))
+            if (is_cleared (x, y) && get_n_adjacent_mines (x, y) == get_n_uncleared_neighbours (x, y))
             {
                 foreach (var neighbour in neighbour_map)
                 {
@@ -335,7 +335,7 @@ public class Minefield : Object
             }
 
             // Automatically clear locations if no adjacent mines
-            else if (!locations[x, y].has_mine && get_n_adjacent_mines (x, y) == get_n_flagged_neighbours (x, y))
+            else if (is_cleared (x, y) && get_n_adjacent_mines (x, y) == get_n_flagged_neighbours (x, y))
             {
                 foreach (var neighbour in neighbour_map)
                 {
