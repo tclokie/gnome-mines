@@ -10,10 +10,13 @@ Simple, right? It's surprisingly effective.
 
 Before these rules, GNOME Mines worked like this:
 
-![Gnome-Mines](https://user-images.githubusercontent.com/6445061/114312719-a9056200-9ac1-11eb-9492-2aada03b88fd.gif)
+![Gnome-Mines](https://user-images.githubusercontent.com/6445061/116791149-69a9b000-aa86-11eb-929d-b88d05874266.gif)
+
+
+
 
 Now, the AI turns it into:
 
-![Smart-Mines](https://user-images.githubusercontent.com/6445061/114312720-a9056200-9ac1-11eb-989b-9ac5f58152c6.gif)
+![Smart-Mines](https://user-images.githubusercontent.com/6445061/116791151-6ca4a080-aa86-11eb-9c03-13150ff7bbc8.gif)
 
 Use gnome-builder to compile and build this project.
